@@ -12,10 +12,10 @@ var svgHeight = window.innerHeight;
 
 // Defining chart margins
 var chartMargin = {
-    top: 50,
-    right: 50,
-    bottom: 50,
-    left: 50
+    top: 100,
+    right: 100,
+    bottom: 100,
+    left: 100
 };
 
 // Defining dimensions of the chart area
@@ -35,13 +35,12 @@ var chartGroup = svg.append("g")
 
 d3.csv('/assets/data/data.csv').then(function(StateData) {
   StateData.forEach(function(data) {
-    data.abbr = + data.abbr;
     data.poverty = +data.poverty;
     data.obesity = +data.obesity
   });
   
   StateData.sort(function (a, b) {
-    return a.poverty - b.obesity;
+    return a.poverty - b.poverty;
   });
 
   // Creating scales
@@ -74,31 +73,47 @@ d3.csv('/assets/data/data.csv').then(function(StateData) {
   .attr("cx", d => xLinearScale(d.poverty))
   .attr("cy", d => yLinearScale(d.obesity))
   .attr("r", "10")
-  .attr("fill", "gold")
+  .attr("fill", "lightBlue")
+  .style("opacity", 0.5)
   .attr("stroke-width", "1")
   .attr("stroke", "black")
-  .append("text").text(function(d){
-    return d.abbr;
-  })
 
-  // Append axes titles
+  // Append circle labels
+  var circlesTextGroup = chartGroup.append("g")
+    .selectAll("text")
+    .data(StateData)
+    .enter()
+    .append("text")
+    .attr("x", d => xLinearScale(d.poverty))
+    .attr("y", d => yLinearScale(d.obesity))
+    .style("font-size", "10px")
+    .style("text-anchor", "middle")
+    .style("fill", "black")
+    .text(d => (d.abbr));
+
   
-var labelsGroup = chartGroup.append("g")
-.attr("transform", `translate(${width / 2}, ${height + 20})`);
+// Appending X Axis
+var xAxisGroup = chartGroup.append("g")
+.attr("transform", `translate(${chartWidth / 2}, ${chartHeight + 20})`);
 
-labelsGroup.append("text")
+
+xAxisGroup.append("text")
 .attr("x", 0)
 .attr("y", 20)
+.attr("font-weight",1000)
+.style('fill', 'black')
 .classed("stateText", true)
-.text("Poverty Level");
-
-
-labelsGroup.append("text")
-.attr("x", 0)
-.attr("y", 40)
-.classed("stateCircle", true)
-.text("Obesity Level");
+.text("Poverty Rate (%)");
 
 });
 
-// Need labels and axis
+
+// Appending Y Axis
+var yAxisGroup = chartGroup.append("g")
+.attr("transform", "rotate(-90)", `translate(${chartWidth - 20}, ${chartHeight /2 })`);
+
+yAxisGroup.append("text")
+  .attr("text-anchor", "center")
+  .attr("y", -30)
+  .attr("x", -300)
+  .text("Obesity Rate (%)");
